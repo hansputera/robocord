@@ -1,15 +1,16 @@
-type WebsocketEncodingType = "json" | "etf";
-type CompressType = "zlib-stream";
+type WebsocketProperties = {
+    $os: string;
+    $browser: string;
+    $device: string;
+}
 
 export type GatewayType = "ws" | "wss";
 export interface WebsocketOptions {
     v?: number;
-    encoding?: WebsocketEncodingType;
-    compress?: CompressType;
+    properties?: WebsocketProperties;
 }
 export interface ClientOptions {
-    logging: boolean;
-    token: string;
+    logging?: boolean;
     ws?: WebsocketOptions;
     intents?: number[];
 }
