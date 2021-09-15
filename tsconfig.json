@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "esModuleInterop": true,
+        "module": "CommonJS",
+        "target": "ES6",
+        "skipLibCheck": true,
+        "lib": ["ES2015"],
+        "allowSyntheticDefaultImports": true,
+        "outDir": "./dist"
+    },
+    "include": ["src/**/*"],
+    "exclude": ["node_modules", "dist"]
+}

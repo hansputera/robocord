@@ -1,0 +1,8 @@
+{
+    "semi": true,
+    "parser": "babel-ts",
+    "trailingComma": "es5",
+    "bracketSpacing": true,
+    "singleQuote": true,
+    "arrowParens": "always"
+}
