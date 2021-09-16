@@ -15,4 +15,8 @@ export class UserClass {
     public isBot = this.user.bot;
     public locale = this.user.locale;
     public banner = this.user.banner;
+
+    public getAPIUser() {
+        return this.user;
+    };
 }

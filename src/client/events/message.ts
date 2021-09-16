@@ -18,8 +18,9 @@ export class MessageEvent {
     public messages = messageCaches;
     constructor(private client: Client, private readonly raw: Raw) {};
 
-    onCreate() {
+    async onCreate() {
         const message = new MessageClassRest(this.client, this.raw.d as unknown as APIMessage);
+        message.author = await this.client.userResource.fetch(message.author.id);
         this.messages.set(message.id, message);
         this.client.emit('newMessage', message);
     }

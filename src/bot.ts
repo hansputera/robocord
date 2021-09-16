@@ -1,3 +1,7 @@
+/**
+ * Example.
+ */
+
 import { Client } from "./client";
 import { Util } from "./utils";
 
@@ -9,6 +13,10 @@ const bot = new Client('', {
 
 bot.on('ready', () => {
     console.log('Saya siyapp');
+    bot.user.setActivity('dnd', {
+        name: 'Upin Ipin',
+        type: 'WATCHING',
+    });
 });
 bot.on('newMessage', (m) => {
     console.log('Pesan baru dari:', m.author.tag, 'yaitu: \'', m.content, '\'');
@@ -19,5 +27,6 @@ bot.on('updateMessage', (oldMsg, n) => {
 bot.on('deletedMessage', (m) => {
     console.log('pesan di delete:', m.author.tag);
 });
+bot.on('raw', console.log);
 
 bot.run();

@@ -119,6 +119,14 @@ export class RZRWebSocket {
         }
     }
 
+    public isConnected() {
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public get gatewayUrl(): string {
         return `${this.gatewayType}://${this.gateway}?${this.encodedOptions}`;
     }
