@@ -1,7 +1,7 @@
 /**
  * Example.
  */
-
+ 
 import { Client } from "./client";
 import { Util } from "./utils";
 
