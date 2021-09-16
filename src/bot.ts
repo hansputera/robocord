@@ -10,7 +10,14 @@ const bot = new Client('', {
 bot.on('ready', () => {
     console.log('Saya siyapp');
 });
-
-bot.on('raw', console.log);
+bot.on('newMessage', (m) => {
+    console.log('Pesan baru dari:', m.author.tag, 'yaitu: \'', m.content, '\'');
+});
+bot.on('updateMessage', (oldMsg, n) => {
+    console.log('Pesan di edit dari:', oldMsg.author.tag, '\nkonten lama:', oldMsg.content, '\nkonten baru:', n.content);
+});
+bot.on('deletedMessage', (m) => {
+    console.log('pesan di delete:', m.author.tag);
+});
 
 bot.run();

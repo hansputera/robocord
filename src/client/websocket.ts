@@ -6,6 +6,7 @@ import { Util } from "../utils";
 import type { Client } from "../client";
 import { ClientUser } from "../base/clientUser";
 import type { APIUser } from "discord-api-types";
+import { MessageEvent } from "./events/message";
 
 export class RZRWebSocket {
     private ws: WebSocket;
@@ -42,7 +43,6 @@ export class RZRWebSocket {
     resume(): void {
         if (!this.session.length) throw new Exception('INVALID_SESSION', 'Websocket session token is empty');
         this.ws = new WebSocket(this.gatewayUrl);
-        console.log(this.session);
         this.client.emit('reconnect');
         this.handle(this.ws);
     }
@@ -94,13 +94,29 @@ export class RZRWebSocket {
     }
 
     private handleRaw(chunk: WebSocket.Data) {
+        const eventMessageData = ['MESSAGE_CREATE', 'MESSAGE_UPDATE', 'MESSAGE_DELETE'];
+
         const parses: Raw = JSON.parse(chunk.toString('utf8'));
+        const m = new MessageEvent(this.client, parses);
+        this.client.emit('raw', parses);
+
         if (parses.t === 'READY') {
             this.client.user = new ClientUser(this.client, parses.d.user as APIUser);
             this.client.emit('ready');
             this.session = parses.d.session_id as string;
+        } else if (eventMessageData.includes(parses.t)) {
+            switch(parses.t) {
+                case eventMessageData[0]:
+                    m.onCreate();
+                    break;
+                case eventMessageData[1]:
+                    m.onEdit();
+                    break;
+                case eventMessageData[2]:
+                    m.onDelete();
+                    break;
+            }
         }
-        this.client.emit('raw', parses);
     }
 
     public get gatewayUrl(): string {

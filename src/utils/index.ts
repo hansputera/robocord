@@ -1,5 +1,30 @@
 import { Formatter } from "./formatter";
 
+const MessageTypes = {
+    "0": "DEFAULT",
+    "1": "RECIPIENT_ADD",
+    "2": "RECIPIENT_REMOVE",
+    "3": "CALL",
+    "4": "CHANNEL_NAME_CHANGE",
+    "5": "CHANNEL_ICON_CHANGE",
+    "6": "CHANNEL_PINNED_MESSAGE",
+    "7": "GUILD_MEMBER_JOIN",
+    "8": "USER_PREMIUM_GUILD_SUBSCRIPTION",
+    "9": "USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_1",
+    "10": "USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2",
+    "11": "USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3",
+    "12": "CHANNEL_FOLLOW_ADD",
+    "14": "GUILD_DISCOVERY_DISQUALIFIED",
+    "15": "GUILD_DISCOVERY_REQUALIFIED",
+    "16": "GUILD_DISCOVERY_GRACE_PERIOD_INITIAL_WARNING",
+    "17": "GUILD_DISCOVERY_GRACE_PERIOD_FINAL_WARNING",
+    "18": "THREAD_CREATED",
+    "19": "REPLY",
+    "20": "CHAT_INPUT_COMMAND",
+    "21": "THREAD_STARTER_MESSAGE",
+    "22": "GUILD_INVITE_REMINDER",
+    "23": "CONTEXT_MENU_COMMAND"
+};
 const Intents = {
     'GUILD': 1 << 0,
     'GUILD_MEMBERS': 1 << 1,
@@ -37,4 +62,5 @@ export class Util {
     static opcodes = {
         'gateway': GatewayOpCodes,
     };
+    static messageTypes = MessageTypes;
 };

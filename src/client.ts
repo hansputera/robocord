@@ -5,6 +5,7 @@ import type { ClientEvents, ClientOptions, GatewayBot } from "./typings";
 import { Util } from "./utils";
 import { TypedEmitter as TinyTypedEmitter } from 'tiny-typed-emitter';
 import type { ClientUser } from "./base/clientUser";
+import { GuildResource, UserResource } from "./rest/resources";
 
 const optionsBuilder = (ops: ClientOptions): ClientOptions => {
     if (!ops) ops = {
@@ -32,7 +33,6 @@ const optionsBuilder = (ops: ClientOptions): ClientOptions => {
 }
 export const loggerClient = new Logger('Client');
 export class Client extends TinyTypedEmitter<ClientEvents> {
-    public _gateway: GatewayBot;
     public user: ClientUser;
     constructor(private readonly token: string, private options?: ClientOptions) {
         super();
@@ -42,6 +42,10 @@ export class Client extends TinyTypedEmitter<ClientEvents> {
 
     public ws = new RZRWebSocket(this, this.token, this.options ? this.options.intents : [Util.intents.GUILD], optionsBuilder(this.options).ws);
     public _rest = new RestClient(this.options.ws.v, this.token);
+    public getGateway = this._rest.getGateway;
+
+    public guildResource = new GuildResource(this._rest);
+    public userResource = new UserResource(this._rest);
 
     public async run() {
         if (this.options.logging) loggerClient.warn('Connecting');
@@ -49,7 +53,6 @@ export class Client extends TinyTypedEmitter<ClientEvents> {
             this._rest.getGateway().then(g => {
                 if (g) {
                     loggerClient.success('Token valid');
-                    this._gateway = g;
                     this.ws.connect();
                     resolve(null);
                 } else {
