@@ -1,12 +1,13 @@
-import type { GatewayType, WebsocketOptions } from "../typings";
+import type { GatewayType, Raw, WebsocketOptions } from "../typings";
 import WebSocket from 'ws';
 import { URLSearchParams } from "url";
 import { Exception } from "../exception/exception";
 import { Util } from "../utils";
 import type { Client } from "../client";
+import { ClientUser } from "../base/clientUser";
+import type { APIUser } from "discord-api-types";
 
 export class RZRWebSocket {
-    private connected: boolean = false;
     private ws: WebSocket;
     private gateway = 'gateway.discord.gg';
     private encodedOptions = new URLSearchParams({
@@ -41,27 +42,36 @@ export class RZRWebSocket {
     resume(): void {
         if (!this.session.length) throw new Exception('INVALID_SESSION', 'Websocket session token is empty');
         this.ws = new WebSocket(this.gatewayUrl);
+        console.log(this.session);
+        this.client.emit('reconnect');
         this.handle(this.ws);
     }
 
     connect(): void {
-        if (this.isConnected && this.ws) {
+        if (this.ws) {
             throw new Exception('WEBSOCKET_ALREADY_CONNECTED', 'Websocket is already connected');
-        } else if (!this.isConnected && this.ws) {
+        } else if (this.ws) {
             this.resume();
+        } else {
+            this.ws = new WebSocket(this.gatewayUrl);
+            this.handle(this.ws);
         }
     }
 
     private handle(ws: WebSocket) {
         ws.on('open', () => {
-            this.connected = true;
-            this.send(Util.opcodes.gateway.IDENTIFY, {
+            if (!this.session.length) this.send(Util.opcodes.gateway.IDENTIFY, {
                 'token': this.token,
                 'intents': this.intentss,
                 'properties': this.identifyProperties,
             });
+            else this.send(Util.opcodes.gateway.RESUME, {
+                'token': this.token,
+                'session_id': this.session,
+                'seq': 1337,
+            });
         }).on('close', () => {
-            this.connected = false;
+            this.client.emit('close');
             this.resume();
         }).on('message', (chunk) => this.handleRaw(chunk));
     }
@@ -70,12 +80,13 @@ export class RZRWebSocket {
         const additional = {};
         if (eventName) additional['t'] = eventName;
         if (sequenceNumber) additional['s'] = sequenceNumber;
-
-        if (this.isConnected && this.ws) {
+        if (this.ws) {
             this.ws.send(JSON.stringify({
                 op: opcode,
-                d: payload,
-                ...additional
+                d: {
+                    ...payload,
+                    ...additional,
+                },
             }));
         } else {
             throw new Exception('WEBSOCKET_OFFLINE', 'Websocket not connected, couldn\'t send anything to discord');
@@ -83,12 +94,13 @@ export class RZRWebSocket {
     }
 
     private handleRaw(chunk: WebSocket.Data) {
-        const parses = JSON.parse(chunk.toString('utf8'));
+        const parses: Raw = JSON.parse(chunk.toString('utf8'));
+        if (parses.t === 'READY') {
+            this.client.user = new ClientUser(this.client, parses.d.user as APIUser);
+            this.client.emit('ready');
+            this.session = parses.d.session_id as string;
+        }
         this.client.emit('raw', parses);
-    }
-
-    public get isConnected(): boolean {
-        return this.connected;
     }
 
     public get gatewayUrl(): string {

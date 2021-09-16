@@ -30,12 +30,12 @@ export class Logger {
     }
 
     warn(message: string) {
-        console.log(chalk.yellow(message));
+        console.log(chalk.yellow(this.getFormattedMessage(message)));
         this.getLogging(message).generate();
     }
 
     success(message: string) {
-        console.log(chalk.green(message));
+        console.log(chalk.green(this.getFormattedMessage(message)));
         this.getLogging(message).generate();
     }
 }

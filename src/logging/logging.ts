@@ -1,6 +1,6 @@
 import { writeToPath } from "@fast-csv/format";
 import { parseFile } from "@fast-csv/parse";
-import { existsSync, mkdirSync } from "node:fs";
+import { exists, existsSync, mkdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { Util } from "../utils";
 
@@ -26,6 +26,20 @@ export class Logging {
         return path.resolve(this.directory, `${this.dateFormat}.csv`);
     }
 
+    private isExist() {
+        try {
+            if (existsSync(this.path)) {
+                const content = readFileSync(this.path, {encoding: 'utf-8'});
+                if (content.trim().length) return true;
+                else return false;
+            } else {
+                return false;
+            }
+        } catch {
+            return false;
+        }
+    }
+
     private async generateRows(): Promise<LoggingRow[]> {
         const rows: LoggingRow[] = [
             {
@@ -36,8 +50,7 @@ export class Logging {
             }
         ];
         return await new Promise((resolve) => {
-            if (existsSync(this.path)) {
-                console.log('saya disini');
+            if (this.isExist()) {
                 parseFile(this.path, {
                     'headers': ['date', 'service', 'message', 'exceptionName'],
                     'skipRows': 1,

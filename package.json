@@ -16,6 +16,7 @@
   "devDependencies": {
     "@types/node": "^16.9.1",
     "@types/ws": "^7.4.7",
+    "discord-api-types": "^0.23.1",
     "prettier": "2.4.0",
     "rimraf": "^3.0.2",
     "ts-node": "^10.2.1",
