@@ -8,7 +8,7 @@ import { Util } from "./utils";
 const bot = new Client('', {
     intents: [
         Util.intents.GUILD, Util.intents.GUILD_MESSAGES
-    ],
+    ], 
 });
 
 bot.on('ready', () => {
