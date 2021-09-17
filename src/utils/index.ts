@@ -56,11 +56,24 @@ const GatewayOpCodes = {
     'HELLO': 10,
     'HEARTBEAT_ACK': 11,
 };
+const ChannelTypes = {
+    '0': 'text',
+    '1': 'dm',
+    '2': 'voice',
+    '3': 'dm_group',
+    '4': 'category',
+    '5': 'news',
+    '6': 'store',
+    '10': 'thread_news',
+    '11': 'thread_public',
+    '13': 'voice_stage',
+};
 export class Util {
     static formatter = Formatter;
     static intents = Intents;
     static opcodes = {
         'gateway': GatewayOpCodes,
     };
+    static channelTypes = ChannelTypes;
     static messageTypes = MessageTypes;
 };

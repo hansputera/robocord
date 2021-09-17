@@ -1,19 +1,11 @@
 import type { APIMessage } from "discord-api-types";
-import { MessageClass } from "../../base/message";
-import type { Client } from "../../client";
 import { CacheService } from "../../services/cache";
+import { Context } from "../../transformers/context";
 import { BaseEvent } from "../baseEvent";
+import { MessageClassRest } from "./items/messageClassRest";
 
-export class MessageClassRest extends MessageClass {
-    constructor(private client: Client, msg: APIMessage) {
-        super(msg);
-    }
 
-    public async getGuild() {
-        return await this.client.guildResource.fetch(this.guildID);
-    }
-}
-const messageCaches: CacheService<string, MessageClassRest> = new CacheService({
+const messageCaches: CacheService<string, Context> = new CacheService({
     ttl: (60 * 60) * 1000,
     max: Infinity,
     clock: Date,
@@ -33,8 +25,8 @@ export class MessageEvent extends BaseEvent {
     async onCreate() {
         const message = new MessageClassRest(this.client, this.raw.d as unknown as APIMessage);
         message.author = await this.client.userResource.fetch(message.author.id);
-        this.messages.set(message.id, message);
-        this.client.emit('newMessage', message);
+        this.messages.set(message.id, new Context(this.client, message));
+        this.client.emit('newMessage', new Context(this.client, message));
     }
 
     onEdit() {
@@ -46,12 +38,12 @@ export class MessageEvent extends BaseEvent {
             this.messages.set(message.id, {
                 ...oldMessage,
                 ...message,
-            } as MessageClassRest);
+            } as Context);
         } else {
-            this.messages.set(message.id, message);
+            this.messages.set(message.id, new Context(this.client, message));
         }
 
-        this.client.emit('updateMessage', oldMessage, message);
+        this.client.emit('updateMessage', oldMessage, new Context(this.client, message));
     }
 
     onDelete() {

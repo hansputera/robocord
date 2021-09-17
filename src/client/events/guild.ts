@@ -37,6 +37,7 @@ export class GuildEvent extends BaseEvent {
         const guild = new GuildClassRest(this.client, this.raw.d as unknown as APIGuild);
         guildCaches.set(guild.id, guild);
         if (!isStarted) this.client.emit('newGuild', guild);
+        else this.client.emit('ready');
     }
 
     onLeave() {

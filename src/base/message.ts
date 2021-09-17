@@ -25,4 +25,5 @@ export class MessageClass {
     public attachments = this.msg.attachments ?? [];
     public type = Util.messageTypes[this.msg.type.toString()] as MessageTypees;
     public oldContent = '';
+    public channelID = this.msg.channel_id;
 }

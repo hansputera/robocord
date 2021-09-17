@@ -1,4 +1,6 @@
-import type { APIGuild, Snowflake } from "discord-api-types";
+import type { APIGuild, APIMessage, Snowflake } from "discord-api-types";
+import type { ChannelClass, DMGroupClass, StageVoiceChannelClass, TextChannelClass, VoiceChannelClass } from "../base/channel";
+import type { MessageClassRest } from "../client/events/message";
 
 export interface SessionLimit {
     total: number;
@@ -33,6 +35,8 @@ export interface ActivityOption {
     url?: string;
 }
 
+export type DiscordChannel = TextChannelClass | VoiceChannelClass | StageVoiceChannelClass | ChannelClass | DMGroupClass;
+export type ChannelType = 'dm' | 'dm_group' | 'voice' | 'text' | 'voice_stage' | 'news' | 'store' | 'thread_news' | 'thread_public';
 export type ActivityType = 'PLAYING' | 'LISTENING' | 'COMPETING' | 'WATCHING' | 'CUSTOM' | 'STREAMING';
 export type PresenceStatus = 'idle' | 'online' | 'dnd' | 'invisible' | 'offline';
 export type MessageTypees = 'DEFAULT' | 'RECIPIENT_ADD' | 'RECIPIENT_REMOVE' | 'CALL' | 'CHANNEL_NAME_CHANGE' | 'CHANNEL_ICON_CHANGE' | 'CHANNEL_PINNED_MESSAGE' | 'GUILD_MEMBER_JOIN' | 'USER_PREMIUM_GUILD_SUBSCRIPTION' | 'USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_1' | 'USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2' | 'USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3' | 'CHANNEL_FOLLOW_ADD' | 'GUILD_DISCOVERY_DISQUALIFIED' | 'GUILD_DISCOVERY_REQUALIFIED' | 'GUILD_DISCOVERY_GRACE_PERIOD_INITIAL_WARNING' | 'GUILD_DISCOVERY_GRACE_PERIOD_FINAL_WARNING' | 'THREAD_CREATED' | 'REPLY' | 'CHAT_INPUT_COMMAND' | 'THREAD_STARTER_MESSAGE' | 'GUILD_INVITE_REMINDER' | 'CONTEXT_MENU_COMMAND';

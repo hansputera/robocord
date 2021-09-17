@@ -13,14 +13,17 @@ const bot = new Client('', {
 
 bot.on('ready', () => {
     console.log('Saya siyapp');
+
     bot.user.setActivity('dnd', {
-        name: 'Upin Ipin',
+        name: `${bot.caches.guild.size} server(s)`,
         type: 'WATCHING',
     });
 });
 
-bot.on('newMessage', (m) => {
-    console.log('Pesan baru:', m.id);
+bot.on('newMessage', async (m) => {
+    if (m.author.id != bot.user.id && m.content.toLowerCase() === 'yudha') {
+        await m.send('horny');
+    }
 });
 
 bot.on('reconnect', () => {

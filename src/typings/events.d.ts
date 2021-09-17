@@ -2,6 +2,7 @@ import type { Raw } from ".";
 import type { Client } from "../client";
 import type { GuildClassRest } from "../client/events/guild";
 import type { MessageClassRest } from "../client/events/message";
+import type { Context } from "../transformers/context";
 
 export interface BaseEventImplement {
     eventRequired: string[];
@@ -22,9 +23,9 @@ export interface ClientEvents {
     /**
      * Message
      */
-    newMessage: (message: MessageClassRest) => void;
-    updateMessage: (oldMessage: MessageClassRest, newMessage: MessageClassRest) => void;
-    deletedMessage: (message: MessageClassRest) => void;
+    newMessage: (message: Context) => void;
+    updateMessage: (oldMessage: Context, newMessage: Context) => void;
+    deletedMessage: (message: Context) => void;
 
     /**
      * Guilds

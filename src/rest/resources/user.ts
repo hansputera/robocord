@@ -1,13 +1,8 @@
 import type { APIUser, Snowflake } from "discord-api-types";
 import { UserClass } from "../../base/user";
-import { CacheService } from "../../services/cache";
+import { userCaches } from "../../services/users.cache";
 import type { RestClient } from "../rest";
 
-const userCaches: CacheService<string, UserClass> = new CacheService({
-    ttl: (60 * 60) * 1,
-    max: Infinity,
-    clock: Date,
-});
 export class UserResource {
     /**
      * Guilds cache

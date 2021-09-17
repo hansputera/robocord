@@ -102,7 +102,6 @@ export class RZRWebSocket {
 
         if (parses.t === 'READY') {
             this.client.user = new ClientUser(this.client, parses.d.user as APIUser);
-            this.client.emit('ready');
             this.startedConnect = new Date().getTime();
             this.session = parses.d.session_id as string;
         } else {
@@ -112,7 +111,7 @@ export class RZRWebSocket {
                     const diffSeconds = (new Date().getTime() - this.startedConnect) / 1000;
                     event.setClient(this.client);
                     event.setRaw(parses);
-                    
+
                     const action = event.eventAction[parses.t];
                     this.loader.runEvent(event, action, [diffSeconds < 2]);
                 });

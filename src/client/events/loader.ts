@@ -1,7 +1,5 @@
-import { readdirSync } from "fs";
+import { readdirSync, statSync } from "fs";
 import path from "path";
-import type { Client } from "../../client";
-import type { Raw } from "../../typings";
 import { CacheService } from "../../services/cache";
 import type { BaseEvent } from '../baseEvent';
 
@@ -53,7 +51,7 @@ export class LoaderEvent {
     public load() {
         if (this._events.toArray().length) this._events.flush();
         const files = readdirSync(path.resolve(__dirname));
-        files.filter(fl => !this.blacklistFiles.includes(fl.split('.').at(0))).forEach(file => {
+        files.filter(fl => !statSync(path.resolve(__dirname, fl)).isDirectory() && !this.blacklistFiles.includes(fl.split('.').at(0))).forEach(file => {
             if (require(path.resolve(__dirname, file)).default) {
                 const fl: BaseEvent = new (require(path.resolve(__dirname, file)).default)();
                 const name = file.split('.').at(0);

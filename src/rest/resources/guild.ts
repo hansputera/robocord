@@ -1,14 +1,9 @@
 import type { APIGuild, APIGuildPreview, Snowflake } from "discord-api-types";
 import { GuildClass } from "../../base/guild";
-import { CacheService } from "../../services/cache";
+import { guildCaches } from "../../client/events/guild";
 import type { GuildCreateOptions } from "../../typings";
 import type { RestClient } from "../rest";
 
-const guildCaches: CacheService<string, GuildClass> = new CacheService({
-    ttl: (60 * 60) * 1,
-    max: Infinity,
-    clock: Date,
-});
 export class GuildResource {
     /**
      * Guilds cache

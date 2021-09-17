@@ -1,11 +1,13 @@
 import { RZRWebSocket } from "./client/websocket";
 import { Logger } from "./logging/logger";
 import { RestClient } from "./rest/rest";
-import type { ClientEvents, ClientOptions, GatewayBot } from "./typings";
+import type { ClientEvents, ClientOptions } from "./typings";
 import { Util } from "./utils";
 import { TypedEmitter as TinyTypedEmitter } from 'tiny-typed-emitter';
 import type { ClientUser } from "./base/clientUser";
 import { GuildResource, UserResource } from "./rest/resources";
+import { userCaches } from "./services/users.cache";
+import { guildCaches } from "./client/events/guild";
 
 const optionsBuilder = (ops: ClientOptions): ClientOptions => {
     if (!ops) ops = {
@@ -46,6 +48,11 @@ export class Client extends TinyTypedEmitter<ClientEvents> {
 
     public guildResource = new GuildResource(this._rest);
     public userResource = new UserResource(this._rest);
+
+    public caches = {
+        user: userCaches,
+        guild: guildCaches,
+    };
 
     public async run() {
         if (this.options.logging) loggerClient.warn('Connecting');
