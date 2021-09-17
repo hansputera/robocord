@@ -6,10 +6,10 @@
   "author": "Hanif",
   "license": "MIT",
   "dependencies": {
+    "@brokerloop/ttlcache": "^3.2.3",
     "chalk": "^4.1.2",
     "fast-csv": "^4.3.6",
     "got": "^11.8.2",
-    "node-cache": "^5.1.2",
     "tiny-typed-emitter": "^2.1.0",
     "ws": "^8.2.2"
   },

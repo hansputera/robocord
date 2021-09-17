@@ -5,7 +5,7 @@
 import { Client } from "./client";
 import { Util } from "./utils";
 
-const bot = new Client('ODc5MzE5NTcwOTIwNDA3MDQw.YSOAKg.g7EQ7JNoCxMzX5Da3Mw97BVjOGA', {
+const bot = new Client('', {
     intents: [
         Util.intents.GUILD, Util.intents.GUILD_MESSAGES
     ], 
@@ -19,8 +19,8 @@ bot.on('ready', () => {
     });
 });
 
-bot.on('newGuild', (g) => {
-    console.log('Guild masuk:', g.id);
+bot.on('newMessage', (m) => {
+    console.log('Pesan baru:', m.id);
 });
 
 bot.on('reconnect', () => {

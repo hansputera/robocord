@@ -6,8 +6,7 @@ import { Util } from "../utils";
 import type { Client } from "../client";
 import { ClientUser } from "../base/clientUser";
 import type { APIUser } from "discord-api-types";
-import { MessageEvent } from "./events/message";
-import { GuildEvent } from "./events/guild";
+import { LoaderEvent } from "./events/loader";
 
 export class RZRWebSocket {
     private ws: WebSocket;
@@ -40,7 +39,9 @@ export class RZRWebSocket {
         intents.forEach(intent => {
             this.intentss += intent;
         });
+        this.loader.load();
     };
+    private loader = new LoaderEvent();
 
     resume(): void {
         if (!this.session.length) throw new Exception('INVALID_SESSION', 'Websocket session token is empty');
@@ -96,12 +97,7 @@ export class RZRWebSocket {
     }
 
     private handleRaw(chunk: WebSocket.Data) {
-        const eventMessageData = ['MESSAGE_CREATE', 'MESSAGE_UPDATE', 'MESSAGE_DELETE'];
-        const eventGuildData = ['GUILD_CREATE', 'GUILD_DELETE'];
-
         const parses: Raw = JSON.parse(chunk.toString('utf8'));
-        const m = new MessageEvent(this.client, parses);
-        const g = new GuildEvent(this.client, parses);
         this.client.emit('raw', parses);
 
         if (parses.t === 'READY') {
@@ -109,27 +105,17 @@ export class RZRWebSocket {
             this.client.emit('ready');
             this.startedConnect = new Date().getTime();
             this.session = parses.d.session_id as string;
-        } else if (eventMessageData.includes(parses.t)) {
-            if ((parses.d as Record<string, string>).webhook_id) return;
-            switch(parses.t) {
-                case eventMessageData[0]:
-                    m.onCreate();
-                    break;
-                case eventMessageData[1]:
-                    m.onEdit();
-                    break;
-                case eventMessageData[2]:
-                    m.onDelete();
-                    break;
-            }
-        } else if (eventGuildData.includes(parses.t)) {
-            const diffSeconds = (new Date().getTime() - this.startedConnect) / 1000;
-            switch(parses.t) {
-                case eventGuildData[0]:
-                    g.onCreate(diffSeconds < 2);
-                    break;
-                case eventGuildData[1]:
-                    g.onLeave();
+        } else {
+            const events = this.loader.searchEvent(parses.t);
+            if (events.length) {
+                events.forEach(event => {
+                    const diffSeconds = (new Date().getTime() - this.startedConnect) / 1000;
+                    event.setClient(this.client);
+                    event.setRaw(parses);
+                    
+                    const action = event.eventAction[parses.t];
+                    this.loader.runEvent(event, action, [diffSeconds < 2]);
+                });
             }
         }
     }

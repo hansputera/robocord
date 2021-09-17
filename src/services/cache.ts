@@ -1,36 +1,29 @@
-import NodeCache from "node-cache";
+import { Clock, TTLCache } from "@brokerloop/ttlcache";
 
-export class CacheService<V> {
-    constructor(private readonly ttl = (60 * 60) * 1) {}
-    public cache = new NodeCache({
-        stdTTL: this.ttl,
-        checkperiod: this.ttl * 0.2,
-        useClones: false,
-    });
-
-    public get(key: NodeCache.Key): V {
-        const data = this.cache.get(key);
-        return data as V;
+type CacheOption = {
+    ttl: number;
+    max: number;
+    clock: Clock;
+}
+export class CacheService<K, V> extends TTLCache<K, V> {
+    constructor(private options?: CacheOption) {
+        super(options);
     }
 
-    public set(key: NodeCache.Key, value: V): boolean {
-        return this.cache.set(key, value);    
+    toArray(): V[] {
+        const temp: V[] = [];
+        const vals = this.values();
+        for (const v of vals) {
+            temp.push(v);
+        }
+
+        return temp;
     }
 
-    public has(key: NodeCache.Key): boolean {
-        return this.cache.has(key);
-    }
-
-    public delete(keys: NodeCache.Key | NodeCache.Key[]): void {
-        this.cache.del(keys);
-    }
-
-    public flush(): void {
-        this.cache.flushAll();
-    }
-
-    public toArray(): V[] {
-       const keys = this.cache.keys();
-       return keys.map(x => this.get(x)); 
+    flush() {
+        const keys = this.keys();
+        for (const key of keys) {
+            this.delete(key);
+        }
     }
 }

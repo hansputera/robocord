@@ -2,7 +2,7 @@ import type { APIMessage } from "discord-api-types";
 import { MessageClass } from "../../base/message";
 import type { Client } from "../../client";
 import { CacheService } from "../../services/cache";
-import type { Raw } from "../../typings";
+import { BaseEvent } from "../baseEvent";
 
 export class MessageClassRest extends MessageClass {
     constructor(private client: Client, msg: APIMessage) {
@@ -13,10 +13,22 @@ export class MessageClassRest extends MessageClass {
         return await this.client.guildResource.fetch(this.guildID);
     }
 }
-const messageCaches: CacheService<MessageClassRest> = new CacheService();
-export class MessageEvent {
+const messageCaches: CacheService<string, MessageClassRest> = new CacheService({
+    ttl: (60 * 60) * 1000,
+    max: Infinity,
+    clock: Date,
+});
+export class MessageEvent extends BaseEvent {
+    public eventRequired = ['MESSAGE_CREATE', 'MESSAGE_UPDATE', 'MESSAGE_DELETE'];
+    public eventAction = {
+        [this.eventRequired.at(0)]: this.onCreate.name,
+        [this.eventRequired.at(1)]: this.onEdit.name,
+        [this.eventRequired.at(2)]: this.onDelete.name,
+    };
     public messages = messageCaches;
-    constructor(private client: Client, private readonly raw: Raw) {};
+    constructor() {
+        super();
+    };
 
     async onCreate() {
         const message = new MessageClassRest(this.client, this.raw.d as unknown as APIMessage);
@@ -49,3 +61,5 @@ export class MessageEvent {
         this.client.emit('deletedMessage', oldMessage);
     }
 }
+
+export default MessageEvent;
