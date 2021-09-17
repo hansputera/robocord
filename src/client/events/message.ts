@@ -43,9 +43,9 @@ export class MessageEvent {
     }
 
     onDelete() {
-        const message = new MessageClassRest(this.client, this.raw.d as unknown as APIMessage);
-        if (this.messages.has(message.id)) this.messages.delete(message.id);
+        const oldMessage = this.messages.get((this.raw.d as Record<string, string>).id);
+        this.messages.delete(oldMessage.id);
 
-        this.client.emit('deletedMessage', message);
+        this.client.emit('deletedMessage', oldMessage);
     }
 }

@@ -7,6 +7,7 @@ import type { Client } from "../client";
 import { ClientUser } from "../base/clientUser";
 import type { APIUser } from "discord-api-types";
 import { MessageEvent } from "./events/message";
+import { GuildEvent } from "./events/guild";
 
 export class RZRWebSocket {
     private ws: WebSocket;
@@ -16,6 +17,7 @@ export class RZRWebSocket {
         encoding: 'json',
     });
     private gatewayType: GatewayType = 'wss';
+    private startedConnect: number;
     private session = '';
     private identifyProperties = {
         '$os': this.options.properties.$os ? this.options.properties.$os : 'Linux',
@@ -95,16 +97,20 @@ export class RZRWebSocket {
 
     private handleRaw(chunk: WebSocket.Data) {
         const eventMessageData = ['MESSAGE_CREATE', 'MESSAGE_UPDATE', 'MESSAGE_DELETE'];
+        const eventGuildData = ['GUILD_CREATE', 'GUILD_DELETE'];
 
         const parses: Raw = JSON.parse(chunk.toString('utf8'));
         const m = new MessageEvent(this.client, parses);
+        const g = new GuildEvent(this.client, parses);
         this.client.emit('raw', parses);
 
         if (parses.t === 'READY') {
             this.client.user = new ClientUser(this.client, parses.d.user as APIUser);
             this.client.emit('ready');
+            this.startedConnect = new Date().getTime();
             this.session = parses.d.session_id as string;
         } else if (eventMessageData.includes(parses.t)) {
+            if ((parses.d as Record<string, string>).webhook_id) return;
             switch(parses.t) {
                 case eventMessageData[0]:
                     m.onCreate();
@@ -116,7 +122,20 @@ export class RZRWebSocket {
                     m.onDelete();
                     break;
             }
+        } else if (eventGuildData.includes(parses.t)) {
+            const diffSeconds = (new Date().getTime() - this.startedConnect) / 1000;
+            switch(parses.t) {
+                case eventGuildData[0]:
+                    g.onCreate(diffSeconds < 2);
+                    break;
+                case eventGuildData[1]:
+                    g.onLeave();
+            }
         }
+    }
+
+    public getUptime() {
+        return new Date().getTime() - this.startedConnect;
     }
 
     public isConnected() {

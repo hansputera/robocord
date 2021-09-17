@@ -5,7 +5,7 @@
 import { Client } from "./client";
 import { Util } from "./utils";
 
-const bot = new Client('', {
+const bot = new Client('ODc5MzE5NTcwOTIwNDA3MDQw.YSOAKg.g7EQ7JNoCxMzX5Da3Mw97BVjOGA', {
     intents: [
         Util.intents.GUILD, Util.intents.GUILD_MESSAGES
     ], 
@@ -18,15 +18,13 @@ bot.on('ready', () => {
         type: 'WATCHING',
     });
 });
-bot.on('newMessage', (m) => {
-    console.log('Pesan baru dari:', m.author.tag, 'yaitu: \'', m.content, '\'');
+
+bot.on('newGuild', (g) => {
+    console.log('Guild masuk:', g.id);
 });
-bot.on('updateMessage', (oldMsg, n) => {
-    console.log('Pesan di edit dari:', oldMsg.author.tag, '\nkonten lama:', oldMsg.content, '\nkonten baru:', n.content);
+
+bot.on('reconnect', () => {
+    console.log('Reconnecting');
 });
-bot.on('deletedMessage', (m) => {
-    console.log('pesan di delete:', m.author.tag);
-});
-bot.on('raw', console.log);
 
 bot.run();
