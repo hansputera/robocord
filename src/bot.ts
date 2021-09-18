@@ -22,7 +22,14 @@ bot.on('ready', () => {
 
 bot.on('newMessage', async (m) => {
     if (m.author.id != bot.user.id && m.content.toLowerCase() === 'yudha') {
-        await m.send('horny');
+        const embed = new Util.embedBuilder()
+        .setTitle('Hello world')
+        .setDescription('Halo semua')
+        .setColor('#FFFFFF')
+        .setTimestamp()
+        .build();
+
+        await m.sendEmbeds(embed);
     }
 });
 

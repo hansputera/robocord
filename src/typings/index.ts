@@ -8,3 +8,4 @@ export interface Raw {
 export * from './options';
 export * from './gateway';
 export * from './events';
+export * from './util';

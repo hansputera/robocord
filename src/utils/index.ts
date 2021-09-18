@@ -1,3 +1,4 @@
+import { EmbedBuilder } from "./embedBuilder";
 import { Formatter } from "./formatter";
 
 const MessageTypes = {
@@ -69,6 +70,7 @@ const ChannelTypes = {
     '13': 'voice_stage',
 };
 export class Util {
+    static embedBuilder = EmbedBuilder;
     static formatter = Formatter;
     static intents = Intents;
     static opcodes = {

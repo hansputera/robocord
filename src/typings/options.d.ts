@@ -1,3 +1,5 @@
+import type { AllowedMentions } from ".";
+
 type WebsocketProperties = {
     $os: string;
     $browser: string;
@@ -13,4 +15,5 @@ export interface ClientOptions {
     logging?: boolean;
     ws?: WebsocketOptions;
     intents?: number[];
+    allowedMentions?: AllowedMentions[];
 }

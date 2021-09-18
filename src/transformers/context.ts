@@ -1,4 +1,4 @@
-import type { APIMessage } from "discord-api-types";
+import type { APIEmbed, APIMessage, RESTPostAPIChannelMessageJSONBody } from "discord-api-types";
 import type { Client } from "../client";
 import { MessageClassRest } from "../client/events/items/messageClassRest";
 
@@ -13,11 +13,17 @@ export class Context extends MessageClassRest {
         this._client = client;
     };
 
-    async send(text: string): Promise<APIMessage> {
+    /**
+     * Carefull when use it.
+     * 
+     * @param options - API Send Message Options
+     */
+    async sendAPI(options?: RESTPostAPIChannelMessageJSONBody): Promise<APIMessage> {
         try {
             const resp = this._client._rest.api.post('channels/' + this.channelID + '/messages', {
                 json: {
-                    content: text,
+                    allowed_mentions: this._client.getOptions(),
+                    ...options,
                 }
             });
             return (await resp.json()) as APIMessage;
@@ -25,5 +31,19 @@ export class Context extends MessageClassRest {
             console.error(err);
             return undefined;
         }
+    }
+
+    async sendEmbeds(embed: APIEmbed | APIEmbed[]): Promise<APIMessage> {
+        const response = await this.sendAPI({
+            embeds: Array.isArray(embed) ? embed : [embed],
+        });
+        return response;
+    }
+
+    async sendText(text: string): Promise<APIMessage> {
+        const response = await this.sendAPI({
+            content: text,
+        });
+        return response;
     }
 }

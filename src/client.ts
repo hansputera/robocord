@@ -11,6 +11,7 @@ import { guildCaches } from "./client/events/guild";
 
 const optionsBuilder = (ops: ClientOptions): ClientOptions => {
     if (!ops) ops = {
+        allowedMentions: [],
         logging: false,
         intents: [],
         ws: {
@@ -68,5 +69,9 @@ export class Client extends TinyTypedEmitter<ClientEvents> {
                 }
             });
         });
+    }
+
+    public getOptions(): ClientOptions {
+        return this.options;
     }
 }
