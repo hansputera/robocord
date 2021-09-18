@@ -1,4 +1,4 @@
-import type { APIGuild, APIMessage, Snowflake } from "discord-api-types";
+import type { APIEmbed, APIGuild, APIMessage, Snowflake } from "discord-api-types";
 import type { ChannelClass, DMGroupClass, StageVoiceChannelClass, TextChannelClass, VoiceChannelClass } from "../base/channel";
 import type { MessageClassRest } from "../client/events/message";
 
@@ -33,6 +33,13 @@ export interface ActivityOption {
     name: string;
     type?: ActivityType;
     url?: string;
+}
+
+export interface SendMessageOptions {
+    content: string;
+    tts?: boolean;
+    embeds?: APIEmbed[];
+    
 }
 
 export type DiscordChannel = TextChannelClass | VoiceChannelClass | StageVoiceChannelClass | ChannelClass | DMGroupClass;
