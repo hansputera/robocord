@@ -35,13 +35,8 @@ export interface ActivityOption {
     url?: string;
 }
 
-export interface SendMessageOptions {
-    content: string;
-    tts?: boolean;
-    embeds?: APIEmbed[];
-    
-}
-
+export type MessageComponentButtonStyle = 'primary' | 'secondary' | 'success' | 'danger' | 'link';
+export type MessageComponentType = 'menu' | 'button' | 'action'; 
 export type DiscordChannel = TextChannelClass | VoiceChannelClass | StageVoiceChannelClass | ChannelClass | DMGroupClass;
 export type ChannelType = 'dm' | 'dm_group' | 'voice' | 'text' | 'voice_stage' | 'news' | 'store' | 'thread_news' | 'thread_public';
 export type ActivityType = 'PLAYING' | 'LISTENING' | 'COMPETING' | 'WATCHING' | 'CUSTOM' | 'STREAMING';

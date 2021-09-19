@@ -1,3 +1,5 @@
+import _ from "lodash";
+import { ActionRowButtonBuilder, ButtonComponentBuilder, MenuComponentBuilder } from "./componentBuilder";
 import { EmbedBuilder } from "./embedBuilder";
 import { Formatter } from "./formatter";
 
@@ -43,7 +45,11 @@ const Intents = {
     'DIRECT_MESSAGE_REACTIONS': 1 << 13,
     'DIRECT_MESSAGE_TYPING': 1 << 14,
 };
-
+const MessageComponentTypes = {
+    'action': 1,
+    'button': 2,
+    'menu': 3,
+};
 const GatewayOpCodes = {
     'DISPATCH': 0,
     'HEARTBEAT': 1,
@@ -69,8 +75,18 @@ const ChannelTypes = {
     '11': 'thread_public',
     '13': 'voice_stage',
 };
+const MessageComponentButtonStyles = {
+    'primary': 1,
+    'secondary': 2,
+    'success': 3,
+    'danger': 4,
+    'link': 5,
+}
 export class Util {
-    static embedBuilder = EmbedBuilder;
+    static EmbedBuilder = EmbedBuilder;
+    static ButtonComponentBuilder = ButtonComponentBuilder;
+    static MenuComponentBuilder = MenuComponentBuilder;
+    static ActionRowComponentBuilder = ActionRowButtonBuilder;
     static formatter = Formatter;
     static intents = Intents;
     static opcodes = {
@@ -78,4 +94,7 @@ export class Util {
     };
     static channelTypes = ChannelTypes;
     static messageTypes = MessageTypes;
+    static messageComponentTypes = MessageComponentTypes;
+    static messageComponentButtonStyles = MessageComponentButtonStyles;
+    static lodash = _;
 };

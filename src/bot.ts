@@ -22,14 +22,29 @@ bot.on('ready', () => {
 
 bot.on('newMessage', async (m) => {
     if (m.author.id != bot.user.id && m.content.toLowerCase() === 'yudha') {
-        const embed = new Util.embedBuilder()
-        .setTitle('Hello world')
-        .setDescription('Halo semua')
-        .setColor('#FFFFFF')
-        .setTimestamp()
-        .build();
+        const buttonComponent = new Util.ButtonComponentBuilder();
+    
+        const instance1 = buttonComponent.createInstance()
+        .setID('yudha')
+        .setStyle('primary')
+        .setLabel('Yudha')
+        .toggle();
 
-        await m.sendEmbeds(embed);
+        const instance2 = buttonComponent.createInstance()
+        .setID('hanif')
+        .setStyle('success')
+        .setLabel('Hanif button')
+        .toggle();
+
+        buttonComponent.addInstance(instance1, instance2);
+        
+        const actionRow = new Util.ActionRowComponentBuilder();
+        actionRow.addInstancePlain(instance1.toJSON(), instance2.toJSON());
+
+        await m.sendAPI({
+            components: actionRow.build(),
+            content: 'Hello world',
+        });
     }
 });
 

@@ -46,4 +46,17 @@ export class Context extends MessageClassRest {
         });
         return response;
     }
+
+    async replyText(text: string): Promise<APIMessage> {
+        const response = await this.sendAPI({
+            message_reference: {
+                message_id: this.id,
+                channel_id: this.channelID,
+                guild_id: this.guildID,
+            },
+            content: text,
+        });
+
+        return response;
+    }
 }
