@@ -3,7 +3,7 @@ import { Util } from ".";
 import { Exception } from "../exception/exception";
 import type { MessageComponentButtonStyle, MessageComponentType } from "../typings";
 
-export class ComponentBuilder {
+class ComponentBuilder {
     constructor(
         private type: MessageComponentType
     ) {};
@@ -113,35 +113,7 @@ class MenuBuilder {
 // -------------------------------------------------------------------------------- //
 
 // ------------------- BUTTON BUILDER ------------------------------------ //
-
-export class ButtonComponentBuilder extends ComponentBuilder {
-    protected buttons: APIButtonComponent[] = [];
-    constructor() {
-        super('button');
-    };
-
-    /**
-     * Create button instance.
-     */
-    createInstance(): ButtonBuilder {
-        return new ButtonBuilder();
-    }
-
-    /**
-     * Add your button instance.
-     * 
-     * @param buttons - Your button instance.
-     */
-    addInstance(...buttons: ButtonBuilder[]) {
-        buttons.forEach(btn => this.buttons.push(btn.toJSON()));
-    };
-
-    build() {
-        return this.buttons;
-    }
-}
-
-class ButtonBuilder {
+export class ButtonBuilder {
     protected url?: string = '';
     protected emoji?: APIMessageComponentEmoji;
     protected label?: string;

@@ -1,6 +1,6 @@
 import { writeToPath } from "@fast-csv/format";
 import { parseFile } from "@fast-csv/parse";
-import { exists, existsSync, mkdirSync, readFileSync } from "node:fs";
+import { access, accessSync, constants, exists, existsSync, mkdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { Util } from "../utils";
 
@@ -14,27 +14,22 @@ export type LoggingRow = {
 export class Logging {
     private _date = new Date();
     private dateFormat = Util.formatter.exceptionDateFile(this._date);
-    private directory = path.resolve(__dirname, '..', 'logs', this.service);
+    private directory = path.resolve(__dirname, '..', 'logs');
 
     constructor(private readonly service: string = 'system', private readonly message?: string, private readonly exceptionName?: string) {
-        if (!existsSync(path.resolve(__dirname, '..', 'logs'))) mkdirSync(path.resolve(__dirname, '..', 'logs'));
-        if (!existsSync(this.directory)) {
-            mkdirSync(this.directory);
-        };
+        if (!existsSync(this.directory)) mkdirSync(this.directory);
     }
     private get path() {
-        return path.resolve(this.directory, `${this.dateFormat}.csv`);
+        return path.resolve(this.directory, `${this.service}__${this.dateFormat}.csv`);
     }
 
     private isExist() {
         try {
-            if (existsSync(this.path)) {
+            if (!readFileSync(this.path, 'utf-8')) {
                 const content = readFileSync(this.path, {encoding: 'utf-8'});
                 if (content.trim().length) return true;
                 else return false;
-            } else {
-                return false;
-            }
+            } else return false;
         } catch {
             return false;
         }
@@ -78,6 +73,6 @@ export class Logging {
     }
     public async generate() {
         const rows = await this.generateRows();
-        writeToPath(this.directory, rows).on('error', console.error);
+        writeToPath(this.path, rows).on('error', console.error);
     }
 }

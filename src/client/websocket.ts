@@ -7,6 +7,8 @@ import type { Client } from "../client";
 import { ClientUser } from "../base/clientUser";
 import type { APIUser } from "discord-api-types";
 import { LoaderEvent } from "./events/loader";
+import { existsSync, readFileSync, writeFileSync } from "fs";
+import path from "path";
 
 export class RZRWebSocket {
     private ws: WebSocket;
@@ -36,6 +38,14 @@ export class RZRWebSocket {
         readonly intents: number[] = [],
         private readonly options?: WebsocketOptions
     ) {
+        if (existsSync(path.resolve(client.getOptions().sessionFile))) {
+            const context = readFileSync(path.resolve(client.getOptions().sessionFile), {
+                'encoding': 'utf-8',
+            });
+            if (context.trim().length) {
+                this.session = context.trim();
+            }
+        }
         intents.forEach(intent => {
             this.intentss += intent;
         });
@@ -51,7 +61,7 @@ export class RZRWebSocket {
     }
 
     connect(): void {
-        if (this.ws) {
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
             throw new Exception('WEBSOCKET_ALREADY_CONNECTED', 'Websocket is already connected');
         } else if (this.ws) {
             this.resume();
@@ -99,11 +109,23 @@ export class RZRWebSocket {
     private handleRaw(chunk: WebSocket.Data) {
         const parses: Raw = JSON.parse(chunk.toString('utf8'));
         this.client.emit('raw', parses);
-
         if (parses.t === 'READY') {
             this.client.user = new ClientUser(this.client, parses.d.user as APIUser);
             this.startedConnect = new Date().getTime();
+            if (existsSync(path.resolve(this.client.getOptions().sessionFile))) writeFileSync(path.resolve(this.client.getOptions().sessionFile), parses.d.session_id as string);
             this.session = parses.d.session_id as string;
+        } else if (parses.op === Util.opcodes.gateway.INVALID_SESSION) {
+            this.session = '';
+            this.ws = undefined;
+            writeFileSync(path.resolve(this.client.getOptions().sessionFile), this.session);
+            this.connect();
+        } else if (parses.t === 'RESUMED' && !this.client.user) {
+            this.client.userResource.getMe().then(user => {
+                if (user) {
+                    this.client.user = new ClientUser(this.client, user);
+                }
+            });
+            this.startedConnect = new Date().getTime();
         } else {
             const events = this.loader.searchEvent(parses.t);
             if (events.length) {

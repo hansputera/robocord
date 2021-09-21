@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { ActionRowButtonBuilder, ButtonComponentBuilder, MenuComponentBuilder } from "./componentBuilder";
+import { ActionRowButtonBuilder, ButtonBuilder, MenuComponentBuilder } from "./componentBuilder";
 import { EmbedBuilder } from "./embedBuilder";
 import { Formatter } from "./formatter";
 
@@ -84,7 +84,7 @@ const MessageComponentButtonStyles = {
 }
 export class Util {
     static EmbedBuilder = EmbedBuilder;
-    static ButtonComponentBuilder = ButtonComponentBuilder;
+    static ButtonComponentBuilder = ButtonBuilder;
     static MenuComponentBuilder = MenuComponentBuilder;
     static ActionRowComponentBuilder = ActionRowButtonBuilder;
     static formatter = Formatter;

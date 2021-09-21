@@ -12,8 +12,25 @@ export interface WebsocketOptions {
     properties?: WebsocketProperties;
 }
 export interface ClientOptions {
+    /**
+     * If logging was enabled, we will save our logging to the file.
+     * 
+     * @description It means, your storage will used for logging.
+     */
     logging?: boolean;
+    /**
+     * WebSocket Options
+     * 
+     * @description If you do not know what are you doing, don't fill it.
+     */
     ws?: WebsocketOptions;
+    /**
+     * Allowed intents.
+     */
     intents?: number[];
     allowedMentions?: AllowedMentions[];
+    /**
+     * Your session file name.
+     */
+    sessionFile?: string;
 }

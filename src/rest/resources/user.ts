@@ -12,6 +12,16 @@ export class UserResource {
         private rest: RestClient
     ) {};
 
+    public async getMe(): Promise<UserClass> {
+        try {
+            const response = this.rest.api.get('users/@me');
+            const json = await response.json();
+            return new UserClass(json as APIUser);
+        } catch {
+            return undefined
+        }
+    }
+
     public async fetch(userID: Snowflake) {
         if (this.users.has(userID)) return this.users.get(userID);
         try {
