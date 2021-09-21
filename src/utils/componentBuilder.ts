@@ -79,7 +79,7 @@ export class MenuComponentBuilder extends ComponentBuilder {
     }
 }
 
-class MenuBuilder {
+export class MenuBuilder {
     protected emoji?: APIMessageComponentEmoji;
     protected isDefault = false;
 
@@ -113,7 +113,7 @@ class MenuBuilder {
 // -------------------------------------------------------------------------------- //
 
 // ------------------- BUTTON BUILDER ------------------------------------ //
-class ButtonBuilder {
+export class ButtonBuilder {
     protected url?: string = '';
     protected emoji?: APIMessageComponentEmoji;
     protected label?: string;
@@ -160,15 +160,14 @@ class ButtonBuilder {
     }
 
     toJSON(): APIButtonComponent {
-        if (!this.label) this.label = 'A button';
         return {
-            custom_id: this.id,
-            style: this.style,
+            custom_id: this.id ?? Util.lodash.random(10, 20).toString(36).slice(-5),
+            style: this.style ?? Util.messageComponentButtonStyles['primary'],
             type: 2,
             url: this.url,
             emoji: this.emoji,
             disabled: this.isDisabled,
-            label: this.label,
+            label: this.label ?? 'A button',
         };
     }
 }
@@ -189,19 +188,8 @@ export class ActionRowButtonBuilder extends ComponentBuilder {
      * 
      * @param type - Create button instance with button type you want.
      */
-    createInstance(type: Exclude<MessageComponentType, 'action'>): ActionRowButtonComponentBuilder {
-        return new ActionRowButtonComponentBuilder(type);
-    }
-
-    addInstancePlain(...instances: APIButtonComponent[] | APISelectMenuComponent[]) {
-        if (this.components.length > 5 || instances.length > 5) {
-            throw new Exception('ACTION_ROW_INSTANCE', 'Action row instance maximum reached');
-        } else {
-            this.components.push({
-                type: this.getTypeInteger(),
-                components: instances,
-            });
-        }
+    createInstance(): ActionRowButtonComponentBuilder {
+        return new ActionRowButtonComponentBuilder();
     }
 
     /**
@@ -225,15 +213,13 @@ export class ActionRowButtonBuilder extends ComponentBuilder {
 class ActionRowButtonComponentBuilder {
     protected childComponents: APIButtonComponent[] | APISelectMenuComponent[] = [];
 
-    constructor(private instanceType: Exclude<MessageComponentType, 'action'>) {};
-
     /**
      * Create child action row instance button.
      */
-    createChildInstance(): ButtonBuilder | MenuComponentBuilder {
-        if (this.instanceType === 'button') {
+    createChildInstance(instanceType: Exclude<MessageComponentType, 'action'>): ButtonBuilder | MenuComponentBuilder {
+        if (instanceType === 'button') {
             return new ButtonBuilder();
-        } else if (this.instanceType === 'menu') {
+        } else if (instanceType === 'menu') {
             return new MenuComponentBuilder();
         } else {
             return undefined;
@@ -258,3 +244,4 @@ class ActionRowButtonComponentBuilder {
         };
     }
 }
+

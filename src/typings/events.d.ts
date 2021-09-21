@@ -19,6 +19,7 @@ export interface ClientEvents {
     ready: () => void;
     close: () => void;
     reconnect: () => void;
+    error: (err: Error) => void;
 
     /**
      * Message
