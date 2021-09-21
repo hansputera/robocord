@@ -1,5 +1,9 @@
 import _ from "lodash";
+<<<<<<< HEAD
 import { ActionRowButtonBuilder, ButtonBuilder, MenuComponentBuilder } from "./componentBuilder";
+=======
+import { ActionRowButtonBuilder, ButtonComponentBuilder, MenuComponentBuilder } from "./componentBuilder";
+>>>>>>> a7e3a90579be2f29239a5706e1da54b5d652f016
 import { EmbedBuilder } from "./embedBuilder";
 import { Formatter } from "./formatter";
 
@@ -84,7 +88,11 @@ const MessageComponentButtonStyles = {
 }
 export class Util {
     static EmbedBuilder = EmbedBuilder;
+<<<<<<< HEAD
     static ButtonComponentBuilder = ButtonBuilder;
+=======
+    static ButtonComponentBuilder = ButtonComponentBuilder;
+>>>>>>> a7e3a90579be2f29239a5706e1da54b5d652f016
     static MenuComponentBuilder = MenuComponentBuilder;
     static ActionRowComponentBuilder = ActionRowButtonBuilder;
     static formatter = Formatter;

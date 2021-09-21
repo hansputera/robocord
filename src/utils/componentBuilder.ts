@@ -113,7 +113,7 @@ class MenuBuilder {
 // -------------------------------------------------------------------------------- //
 
 // ------------------- BUTTON BUILDER ------------------------------------ //
-export class ButtonBuilder {
+class ButtonBuilder {
     protected url?: string = '';
     protected emoji?: APIMessageComponentEmoji;
     protected label?: string;
