@@ -9,13 +9,14 @@ import type { APIUser } from "discord-api-types";
 import { LoaderEvent } from "./events/loader";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import path from "path";
+import pack, { Packable, unpack } from "@yukikaze-bot/erlpack";
 
 export class RZRWebSocket {
     private ws: WebSocket;
     private gateway = 'gateway.discord.gg';
     private encodedOptions = new URLSearchParams({
         v: this.options ? (this.options.v ? this.options.v.toString() : '8') : '8',
-        encoding: 'json',
+        encoding: 'etf',
     });
     private gatewayType: GatewayType = 'wss';
     private startedConnect: number;
@@ -94,20 +95,30 @@ export class RZRWebSocket {
         if (eventName) additional['t'] = eventName;
         if (sequenceNumber) additional['s'] = sequenceNumber;
         if (this.ws) {
-            this.ws.send(JSON.stringify({
+            const data = {
                 op: opcode,
                 d: {
                     ...payload,
                     ...additional,
                 },
-            }));
+            };
+
+            const packed = pack(data);
+            Util.globalBucket.add(() => this.ws.send(packed));
         } else {
             throw new Exception('WEBSOCKET_OFFLINE', 'Websocket not connected, couldn\'t send anything to discord');
         }
     }
 
     private handleRaw(chunk: WebSocket.Data) {
-        const parses: Raw = JSON.parse(chunk.toString('utf8'));
+        const unpacked = unpack(chunk as Buffer) as { [x:string]: Packable; };
+        const parses: Raw = {
+            op: unpacked.op as number,
+            s: unpacked.s as number,
+            d: unpacked.d as Record<string, unknown>,
+            t: unpacked.t as string,
+        };
+
         this.client.emit('raw', parses);
         if (parses.t === 'READY') {
             this.client.user = new ClientUser(this.client, parses.d.user as APIUser);
@@ -120,11 +131,13 @@ export class RZRWebSocket {
             writeFileSync(path.resolve(this.client.getOptions().sessionFile), this.session);
             this.connect();
         } else if (parses.t === 'RESUMED' && !this.client.user) {
-            this.client.userResource.getMe().then(user => {
-                if (user) {
-                    this.client.user = new ClientUser(this.client, user);
-                }
-            });
+            Util.globalBucket.add(() => {
+                this.client.userResource.getMe().then(user => {
+                    if (user) {
+                        this.client.user = new ClientUser(this.client, user);
+                    }
+                });
+            }, true);
             this.startedConnect = new Date().getTime();
         } else {
             const events = this.loader.searchEvent(parses.t);

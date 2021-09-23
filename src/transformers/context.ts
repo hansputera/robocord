@@ -1,4 +1,4 @@
-import type { APIEmbed, APIMessage, RESTPostAPIChannelMessageJSONBody } from "discord-api-types";
+import type { APIEmbed, APIMessage, RESTPatchAPIChannelMessageJSONBody, RESTPostAPIChannelMessageJSONBody } from "discord-api-types";
 import type { Client } from "../client";
 import { MessageClassRest } from "../client/events/items/messageClassRest";
 
@@ -22,7 +22,7 @@ export class Context extends MessageClassRest {
         try {
             const resp = this._client._rest.api.post('channels/' + this.channelID + '/messages', {
                 json: {
-                    allowed_mentions: this._client.getOptions(),
+                    allowed_mentions: this._client.getOptions().allowedMentions,
                     ...options,
                 }
             });
@@ -30,6 +30,24 @@ export class Context extends MessageClassRest {
         } catch (err) {
             this._client.emit('error', err);
             console.error(err);
+            return undefined;
+        }
+    }
+
+    async edit(content: string, options?: RESTPatchAPIChannelMessageJSONBody) {
+        if (this.author.id !== this._client.user.id) return undefined;
+        try {
+            const resp = this._client._rest.api.patch('channels/' + this.channelID + '/messages/' + this.id, {
+                json: {
+                    allowed_mentions: this._client.getOptions().allowedMentions,
+                    content,
+                    ...options,
+                }
+            });
+
+            const json = await resp.json();
+            return new Context(this._client, new MessageClassRest(this._client, json as APIMessage));
+        } catch {
             return undefined;
         }
     }
@@ -63,7 +81,7 @@ export class Context extends MessageClassRest {
         return response;
     }
 
-    async reply(text: string, options: RESTPostAPIChannelMessageJSONBody): Promise<Context> {
+    async reply(text: string, options?: RESTPostAPIChannelMessageJSONBody): Promise<Context> {
         const response = await this.sendAPI({
             message_reference: {
                 message_id: this.id,

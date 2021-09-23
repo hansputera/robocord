@@ -52,6 +52,10 @@ export class ClientUser extends UserClass {
         this.api = user;
     }
 
+    public getPresences() {
+        return this._presenceOptions;
+    }
+
     public async setUsername(username: string) {
         if (username.toLowerCase() === this.api.username.toLowerCase()) return false;
         try {
@@ -85,6 +89,7 @@ export class ClientUser extends UserClass {
                 url: filled.url,
             }], since: status === 'idle' ? Date.now() : 0, afk: false,
         };
-        this.client.ws.send(Util.opcodes.gateway.PRESENCE_UPDATE, object);
+        const doIt = () => this.client.ws.send(Util.opcodes.gateway.PRESENCE_UPDATE, object);
+        Util.globalBucket.add(doIt);
     }
 }

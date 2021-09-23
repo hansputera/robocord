@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { Bucket } from "../rest/bucket";
 import { ActionRowButtonBuilder, MenuComponentBuilder } from "./componentBuilder";
 import { EmbedBuilder } from "./embedBuilder";
 import { Formatter } from "./formatter";
@@ -62,6 +63,8 @@ const GatewayOpCodes = {
     'INVALID_SESSION': 9,
     'HELLO': 10,
     'HEARTBEAT_ACK': 11,
+    'SYNC_GUILD': 12,
+    'SYNC_CALL': 13,
 };
 const ChannelTypes = {
     '0': 'text',
@@ -96,4 +99,7 @@ export class Util {
     static messageComponentTypes = MessageComponentTypes;
     static messageComponentButtonStyles = MessageComponentButtonStyles;
     static lodash = _;
+    static globalBucket = new Bucket(120, 6000, {
+        reservedTokens: 5,
+    });
 };
