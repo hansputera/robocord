@@ -9,6 +9,7 @@
         "allowSyntheticDefaultImports": true,
         "outDir": "./dist",
         "moduleResolution": "Node",
+        "declaration": true,
     },
     "include": ["src/**/*"],
     "exclude": ["node_modules", "dist"]

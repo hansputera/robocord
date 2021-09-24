@@ -1,247 +1,271 @@
-import type { APIActionRowComponent, APIButtonComponent, APIMessageComponentEmoji, APISelectMenuComponent, APISelectMenuOption } from "discord-api-types";
-import { Util } from ".";
-import { Exception } from "../exception/exception";
-import type { MessageComponentButtonStyle, MessageComponentType } from "../typings";
+import type {
+  APIActionRowComponent,
+  APIButtonComponent,
+  APIMessageComponentEmoji,
+  APISelectMenuComponent,
+  APISelectMenuOption,
+} from 'discord-api-types';
+import { Util } from '.';
+import { Exception } from '../exception/exception';
+import type {
+  MessageComponentButtonStyle,
+  MessageComponentType,
+} from '../typings';
 
 class ComponentBuilder {
-    constructor(
-        private type: MessageComponentType
-    ) {};
+  constructor(private type: MessageComponentType) {}
 
-    public getTypeInteger() {
-        return Util.messageComponentTypes[this.type];
-    }
+  public getTypeInteger() {
+    return Util.messageComponentTypes[this.type];
+  }
 }
 
 // ----------------- MENU BUILDER ------------------------ //
 export class MenuComponentBuilder extends ComponentBuilder {
-    protected menus: APISelectMenuOption[] = [];
-    protected id?: string;
-    protected label?: string;
-    protected minValues = 0;
-    protected maxValues = 25;
-    protected placeholder?: string;
-    protected isDisabled = false;
-    
-    constructor() {
-        super('menu');
-    }
+  protected menus: APISelectMenuOption[] = [];
+  protected id?: string;
+  protected label?: string;
+  protected minValues = 0;
+  protected maxValues = 25;
+  protected placeholder?: string;
+  protected isDisabled = false;
 
-    setLabel(label: string) {
-        this.label = label;
-        return this;
-    }
+  constructor() {
+    super('menu');
+  }
 
-    setPlaceholder(placeholder: string) {
-        this.placeholder = placeholder;
-        return this;
-    }
+  setLabel(label: string) {
+    this.label = label;
+    return this;
+  }
 
-    toggle() {
-        this.isDisabled = !this.isDisabled;
-        return this;
-    }
+  setPlaceholder(placeholder: string) {
+    this.placeholder = placeholder;
+    return this;
+  }
 
-    setMinValues(num: number) {
-        if (num > 25) throw new Exception('MENU_BUILDER', 'Min values cannot higher than 25');
-        else if (num < 1) throw new Exception('MENU_BUILDER', 'Min values cannot lower than 1');
-        this.minValues = num;
-        return this;
-    }
+  toggle() {
+    this.isDisabled = !this.isDisabled;
+    return this;
+  }
 
-    setMaxValues(num: number) {
-        if (num > 25) throw new Exception('MENU_BUILDER', 'Max values cannot higher than 25');
-        else if (num < 1) throw new Exception('MENU_BUILDER', 'Max values cannot lower than 1');
+  setMinValues(num: number) {
+    if (num > 25)
+      throw new Exception('MENU_BUILDER', 'Min values cannot higher than 25');
+    else if (num < 1)
+      throw new Exception('MENU_BUILDER', 'Min values cannot lower than 1');
+    this.minValues = num;
+    return this;
+  }
 
-        this.maxValues = num;
-        return this;
-    }
+  setMaxValues(num: number) {
+    if (num > 25)
+      throw new Exception('MENU_BUILDER', 'Max values cannot higher than 25');
+    else if (num < 1)
+      throw new Exception('MENU_BUILDER', 'Max values cannot lower than 1');
 
-    createInstance(label: string, value: string, description?: string): MenuBuilder {
-        return new MenuBuilder(label, value, description);
-    }
+    this.maxValues = num;
+    return this;
+  }
 
-    addInstances(...instances: MenuBuilder[]) {
-        instances.forEach(instance => {
-            this.menus.push(instance.toJSON());
-        });
-    }
+  createInstance(
+    label: string,
+    value: string,
+    description?: string
+  ): MenuBuilder {
+    return new MenuBuilder(label, value, description);
+  }
 
-    build(): APISelectMenuComponent {
-        return {
-            type: this.getTypeInteger(),
-            options: this.menus,
-            custom_id: this.id,
-            disabled: this.isDisabled,
-            max_values: this.maxValues,
-            min_values: this.minValues,
-        };
-    }
+  addInstances(...instances: MenuBuilder[]) {
+    instances.forEach((instance) => {
+      this.menus.push(instance.toJSON());
+    });
+  }
+
+  build(): APISelectMenuComponent {
+    return {
+      type: this.getTypeInteger(),
+      options: this.menus,
+      custom_id: this.id,
+      disabled: this.isDisabled,
+      max_values: this.maxValues,
+      min_values: this.minValues,
+    };
+  }
 }
 
 export class MenuBuilder {
-    protected emoji?: APIMessageComponentEmoji;
-    protected isDefault = false;
+  protected emoji?: APIMessageComponentEmoji;
+  protected isDefault = false;
 
-    constructor(
-        protected label: string,
-        protected value: string,
-        protected description?: string
-    ) {};
+  constructor(
+    protected label: string,
+    protected value: string,
+    protected description?: string
+  ) {}
 
-    setEmoji(name: string, id?: string, isAnimated = false) {
-        this.emoji = { name, id, animated: isAnimated };
-        return this;
-    }
+  setEmoji(name: string, id?: string, isAnimated = false) {
+    this.emoji = { name, id, animated: isAnimated };
+    return this;
+  }
 
-    setAsDefault() {
-        this.isDefault = true;
-        return this;
-    }
+  setAsDefault() {
+    this.isDefault = true;
+    return this;
+  }
 
-    toJSON(): APISelectMenuOption {
-        return {
-            label: this.label,
-            value: this.value,
-            default: this.isDefault,
-            emoji: this.emoji,
-            description: this.description,
-        };
-    }
+  toJSON(): APISelectMenuOption {
+    return {
+      label: this.label,
+      value: this.value,
+      default: this.isDefault,
+      emoji: this.emoji,
+      description: this.description,
+    };
+  }
 }
 
 // -------------------------------------------------------------------------------- //
 
 // ------------------- BUTTON BUILDER ------------------------------------ //
 export class ButtonBuilder {
-    protected url?: string = '';
-    protected emoji?: APIMessageComponentEmoji;
-    protected label?: string;
-    protected style?: number;
-    protected id?: string;
-    protected isDisabled = false;
+  protected url?: string = '';
+  protected emoji?: APIMessageComponentEmoji;
+  protected label?: string;
+  protected style?: number;
+  protected id?: string;
+  protected isDisabled = false;
 
-    setStyle(style: MessageComponentButtonStyle) {
-        if (style === 'link' && !this.url.length) {
-            throw new Exception('BUTTON_STYLE', 'Link style is require \'url\' attribute!');
-        } else {
-            this.style = Util.messageComponentButtonStyles[style];
-        }
-        return this;
+  setStyle(style: MessageComponentButtonStyle) {
+    if (style === 'link' && !this.url.length) {
+      throw new Exception(
+        'BUTTON_STYLE',
+        "Link style is require 'url' attribute!"
+      );
+    } else {
+      this.style = Util.messageComponentButtonStyles[style];
     }
+    return this;
+  }
 
-    setURL(url: string) {
-        this.url = url;
-        return this;
-    }
+  setURL(url: string) {
+    this.url = url;
+    return this;
+  }
 
-    setEmoji(name: string, id: string = undefined, isAnimated = false) {
-        this.emoji = {
-            name,
-            id,
-            animated: isAnimated,
-        };
-        return this;
+  setEmoji(name: string, id: string = undefined, isAnimated = false) {
+    this.emoji = {
+      name,
+      id,
+      animated: isAnimated,
     };
+    return this;
+  }
 
-    setID(id: string) {
-        this.id = id;
-        return this;
-    }
+  setID(id: string) {
+    this.id = id;
+    return this;
+  }
 
-    setLabel(label: string) {
-        this.label = label.trim().normalize('NFKD');
-        return this;
-    }
-    
-    toggle() {
-        this.isDisabled = !this.isDisabled;
-        return this;
-    }
+  setLabel(label: string) {
+    this.label = label.trim().normalize('NFKD');
+    return this;
+  }
 
-    toJSON(): APIButtonComponent {
-        return {
-            custom_id: this.id ?? Util.lodash.random(10, 20).toString(36).slice(-5),
-            style: this.style ?? Util.messageComponentButtonStyles['primary'],
-            type: 2,
-            url: this.url,
-            emoji: this.emoji,
-            disabled: this.isDisabled,
-            label: this.label ?? 'A button',
-        };
-    }
+  toggle() {
+    this.isDisabled = !this.isDisabled;
+    return this;
+  }
+
+  toJSON(): APIButtonComponent {
+    return {
+      custom_id: this.id ?? Util.lodash.random(10, 20).toString(36).slice(-5),
+      style: this.style ?? Util.messageComponentButtonStyles['primary'],
+      type: 2,
+      url: this.url,
+      emoji: this.emoji,
+      disabled: this.isDisabled,
+      label: this.label ?? 'A button',
+    };
+  }
 }
 
 // ------------------------------------------------------------------------------- //
 
-
 // -------------------------- ACTION BUTTON BUILDER ------------------------------------ //
 
 export class ActionRowButtonBuilder extends ComponentBuilder {
-    protected components: APIActionRowComponent[] = [];
-    constructor() {
-        super('action');
-    }
+  protected components: APIActionRowComponent[] = [];
+  constructor() {
+    super('action');
+  }
 
-    /**
-     * Create action row button instance.
-     * 
-     * @param type - Create button instance with button type you want.
-     */
-    createInstance(): ActionRowButtonComponentBuilder {
-        return new ActionRowButtonComponentBuilder();
-    }
+  /**
+   * Create action row button instance.
+   *
+   * @param type - Create button instance with button type you want.
+   */
+  createInstance(): ActionRowButtonComponentBuilder {
+    return new ActionRowButtonComponentBuilder();
+  }
 
-    /**
-     * Add action row button instance(s).
-     * 
-     * @param instances - List of action row button instances.
-     */
-    addInstance(...instances: ActionRowButtonComponentBuilder[]) {
-        if (this.components.length > 5 || instances.length > 5) {
-            throw new Exception('ACTION_ROW_INSTANCE', 'Action row instance maximum reached');
-        } else {
-            instances.forEach(instance => this.components.push(instance.toJSON() as never));
-        }
+  /**
+   * Add action row button instance(s).
+   *
+   * @param instances - List of action row button instances.
+   */
+  addInstance(...instances: ActionRowButtonComponentBuilder[]) {
+    if (this.components.length > 5 || instances.length > 5) {
+      throw new Exception(
+        'ACTION_ROW_INSTANCE',
+        'Action row instance maximum reached'
+      );
+    } else {
+      instances.forEach((instance) =>
+        this.components.push(instance.toJSON() as never)
+      );
     }
+  }
 
-    build(): APIActionRowComponent[] {
-        return this.components;
-    }
+  build(): APIActionRowComponent[] {
+    return this.components;
+  }
 }
 
 class ActionRowButtonComponentBuilder {
-    protected childComponents: APIButtonComponent[] | APISelectMenuComponent[] = [];
+  protected childComponents: APIButtonComponent[] | APISelectMenuComponent[] =
+    [];
 
-    /**
-     * Create child action row instance button.
-     */
-    createChildInstance(instanceType: Exclude<MessageComponentType, 'action'>): ButtonBuilder | MenuComponentBuilder {
-        if (instanceType === 'button') {
-            return new ButtonBuilder();
-        } else if (instanceType === 'menu') {
-            return new MenuComponentBuilder();
-        } else {
-            return undefined;
-        }
+  /**
+   * Create child action row instance button.
+   */
+  createChildInstance(
+    instanceType: Exclude<MessageComponentType, 'action'>
+  ): ButtonBuilder | MenuComponentBuilder {
+    if (instanceType === 'button') {
+      return new ButtonBuilder();
+    } else if (instanceType === 'menu') {
+      return new MenuComponentBuilder();
+    } else {
+      return undefined;
     }
+  }
 
-    /**
-     * Add your child instance(s).
-     * 
-     * @param childInstances - List of action child action row button instance.
-     */
-    addChildInstance(...childInstances: ButtonBuilder[] | MenuBuilder[]) {
-        childInstances.forEach(instance => {
-            this.childComponents.push(instance.toJSON());
-        });
-    }
+  /**
+   * Add your child instance(s).
+   *
+   * @param childInstances - List of action child action row button instance.
+   */
+  addChildInstance(...childInstances: ButtonBuilder[] | MenuBuilder[]) {
+    childInstances.forEach((instance) => {
+      this.childComponents.push(instance.toJSON());
+    });
+  }
 
-    toJSON(): APIActionRowComponent {
-        return {
-            type: 1,
-            components: this.childComponents,
-        };
-    }
+  toJSON(): APIActionRowComponent {
+    return {
+      type: 1,
+      components: this.childComponents,
+    };
+  }
 }
-
