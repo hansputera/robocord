@@ -11,6 +11,7 @@
     "chalk": "^4.1.2",
     "color-convert": "^2.0.1",
     "fast-csv": "^4.3.6",
+    "fast-zlib": "^2.0.1",
     "got": "^11.8.2",
     "lodash": "^4.17.21",
     "tiny-typed-emitter": "^2.1.0",

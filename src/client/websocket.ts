@@ -3,22 +3,29 @@ import WebSocket from 'ws';
 import { URLSearchParams } from "url";
 import { Exception } from "../exception/exception";
 import { Util } from "../utils";
-import type { Client } from "../client";
+import { Client } from "../client";
 import { ClientUser } from "../base/clientUser";
 import type { APIUser } from "discord-api-types";
 import { LoaderEvent } from "./events/loader";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import path from "path";
 import pack, { Packable, unpack } from "@yukikaze-bot/erlpack";
+import FastZlib from 'fast-zlib';
+
+type ConnectionType = 'offline' | 'reconnecting' | 'connected' | 'connecting';
 
 export class RZRWebSocket {
+    private connectionType: ConnectionType = 'offline';
     private ws: WebSocket;
+    private preConnectNumber = 0;
     private gateway = 'gateway.discord.gg';
     private encodedOptions = new URLSearchParams({
-        v: this.options ? (this.options.v ? this.options.v.toString() : '8') : '8',
+        v: this.options ? (this.options.v ? this.options.v.toString() : '9') : '9',
         encoding: 'etf',
+        compress: 'zlib-stream',
     });
     private gatewayType: GatewayType = 'wss';
+    private inflate = new FastZlib.Inflate();
     private startedConnect: number;
     private session = '';
     private identifyProperties = {
@@ -56,8 +63,12 @@ export class RZRWebSocket {
 
     resume(): void {
         if (!this.session.length) throw new Exception('INVALID_SESSION', 'Websocket session token is empty');
+        this.connectionType = 'reconnecting';
+        if (this.preConnectNumber < 2) {
+            this.client.emit('reconnect');
+            this.preConnectNumber = 0;
+        }
         this.ws = new WebSocket(this.gatewayUrl);
-        this.client.emit('reconnect');
         this.handle(this.ws);
     }
 
@@ -67,6 +78,7 @@ export class RZRWebSocket {
         } else if (this.ws) {
             this.resume();
         } else {
+            this.connectionType = 'connecting';
             this.ws = new WebSocket(this.gatewayUrl);
             this.handle(this.ws);
         }
@@ -74,20 +86,29 @@ export class RZRWebSocket {
 
     private handle(ws: WebSocket) {
         ws.on('open', () => {
-            if (!this.session.length) this.send(Util.opcodes.gateway.IDENTIFY, {
-                'token': this.token,
-                'intents': this.intentss,
-                'properties': this.identifyProperties,
-            });
-            else this.send(Util.opcodes.gateway.RESUME, {
-                'token': this.token,
-                'session_id': this.session,
-                'seq': 1337,
-            });
-        }).on('close', () => {
-            this.client.emit('close');
+            if (!this.session.length) {
+                this.connectionType = 'connecting';
+                this.send(Util.opcodes.gateway.IDENTIFY, {
+                    'token': this.token,
+                    'intents': this.intentss,
+                    'properties': this.identifyProperties,
+                });
+            }
+            else {
+                this.connectionType = 'reconnecting';
+                this.send(Util.opcodes.gateway.RESUME, {
+                    'token': this.token,
+                    'session_id': this.session,
+                    'seq': 1337,
+                });
+            }
+        }).on('close', (code, reason) => {
+            const uncompressReason = this.inflate.process(reason);
+            this.connectionType = 'offline';
+            this.client.emit('close', code, uncompressReason && uncompressReason.toString('utf8'));
             this.resume();
-        }).on('message', (chunk) => this.handleRaw(chunk));
+        }).on('message', (ch) => this.handleRaw(ch))
+        .on('error', (err) => this.client.emit('error', err));
     }
 
     public send(opcode: number, payload: Record<string, unknown>, eventName?: string, sequenceNumber?: number) {
@@ -110,52 +131,67 @@ export class RZRWebSocket {
         }
     }
 
-    private handleRaw(chunk: WebSocket.Data) {
-        const unpacked = unpack(chunk as Buffer) as { [x:string]: Packable; };
-        const parses: Raw = {
-            op: unpacked.op as number,
-            s: unpacked.s as number,
-            d: unpacked.d as Record<string, unknown>,
-            t: unpacked.t as string,
-        };
+    private handleRaw(data: WebSocket.Data) {
+        try {
+            const uncompressed = this.inflate.process(data as Buffer);
+            const unpacked = unpack(uncompressed) as { [x:string]: Packable; };
+            const parses: Raw = {
+                op: unpacked.op as number,
+                s: unpacked.s as number,
+                d: unpacked.d as Record<string, unknown>,
+                t: unpacked.t as string,
+            };
 
-        this.client.emit('raw', parses);
-        if (parses.t === 'READY') {
-            this.client.user = new ClientUser(this.client, parses.d.user as APIUser);
-            this.startedConnect = new Date().getTime();
-            if (existsSync(path.resolve(this.client.getOptions().sessionFile))) writeFileSync(path.resolve(this.client.getOptions().sessionFile), parses.d.session_id as string);
-            this.session = parses.d.session_id as string;
-        } else if (parses.op === Util.opcodes.gateway.INVALID_SESSION) {
-            this.session = '';
-            this.ws = undefined;
-            writeFileSync(path.resolve(this.client.getOptions().sessionFile), this.session);
-            this.connect();
-        } else if (parses.t === 'RESUMED' && !this.client.user) {
-            Util.globalBucket.add(() => {
-                this.client.userResource.getMe().then(user => {
-                    if (user) {
-                        this.client.user = new ClientUser(this.client, user);
-                    }
-                });
-            }, true);
-            this.startedConnect = new Date().getTime();
-        } else {
-            const events = this.loader.searchEvent(parses.t);
-            if (events.length) {
-                events.forEach(event => {
-                    const diffSeconds = (new Date().getTime() - this.startedConnect) / 1000;
-                    event.setClient(this.client);
-                    event.setRaw(parses);
+            this.client.emit('raw', parses);
+            if (parses.t === 'READY') {
+                this.connectionType = 'connected';
+                this.client.user = new ClientUser(this.client, parses.d.user as APIUser);
+                this.startedConnect = new Date().getTime();
+                if (existsSync(path.resolve(this.client.getOptions().sessionFile))) writeFileSync(path.resolve(this.client.getOptions().sessionFile), parses.d.session_id as string);
+                this.session = parses.d.session_id as string;
+            } else if (parses.op === Util.opcodes.gateway.INVALID_SESSION) {
+                this.connectionType = 'offline';
+                this.session = '';
+                this.ws = undefined;
+                writeFileSync(path.resolve(this.client.getOptions().sessionFile), this.session);
+                this.connect();
+            } else if (parses.t === 'RESUMED' && !this.client.user) {
+                this.connectionType = 'connected';
+                Util.globalBucket.add(() => {
+                    this.client.userResource.getMe().then(user => {
+                        if (user) {
+                            this.client.user = new ClientUser(this.client, user);
+                        }
+                    });
+                }, true);
+                this.startedConnect = new Date().getTime();
+            } else {
+                const events = this.loader.searchEvent(parses.t);
+                if (events.length) {
+                    events.forEach(event => {
+                        const diffSeconds = (new Date().getTime() - this.startedConnect) / 1000;
+                        event.setClient(this.client);
+                        event.setRaw(parses);
 
-                    const action = event.eventAction[parses.t];
-                    this.loader.runEvent(event, action, [diffSeconds < 2]);
-                });
+                        const action = event.eventAction[parses.t];
+                        this.loader.runEvent(event, action, [diffSeconds < 2]);
+                    });
+                }
+            }
+        } catch (err) {
+            if (err.code === 'Z_DATA_ERROR') {
+                this.preConnectNumber++;
+                this.ws.close(4_000);
             }
         }
     }
 
     public getUptime() {
         return new Date().getTime() - this.startedConnect;
+    }
+
+    public getStatusConnection() {
+        return this.connectionType;
     }
 
     public isConnected() {
@@ -170,3 +206,5 @@ export class RZRWebSocket {
         return `${this.gatewayType}://${this.gateway}?${this.encodedOptions}`;
     }
 }
+
+process.on('uncaughtException', () => {});

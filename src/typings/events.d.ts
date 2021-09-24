@@ -17,9 +17,10 @@ export interface BaseEventImplement {
 export interface ClientEvents {
     raw: (chunk: Raw) => void;
     ready: () => void;
-    close: () => void;
+    close: (code: number, reason?: string) => void;
     reconnect: () => void;
     error: (err: Error) => void;
+    _hello: () => void;
 
     /**
      * Message

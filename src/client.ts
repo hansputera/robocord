@@ -20,7 +20,7 @@ const optionsBuilder = (ops: ClientOptions): ClientOptions => {
                 $browser: 'Discord Linux',
                 $device: 'Linux',
             },
-            v: 8
+            v: 9
         }
     };
     else if (!ops.ws) ops.ws = {
@@ -29,7 +29,7 @@ const optionsBuilder = (ops: ClientOptions): ClientOptions => {
             $browser: 'Discord Linux',
             $device: 'Linux',
         },
-        v: 8
+        v: 9
     };
 
     return ops;

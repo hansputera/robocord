@@ -368,6 +368,11 @@ fast-csv@^4.3.6:
     "@fast-csv/format" "4.3.5"
     "@fast-csv/parse" "4.3.6"
 
+fast-zlib@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/fast-zlib/-/fast-zlib-2.0.1.tgz#be624f592fc80ad8019ee2025d16a367a4e9b024"
+  integrity sha512-DCoYgNagM2Bt1VIpXpdGnRx4LzqJeYG0oh6Nf/7cWo6elTXkFGMw9CrRCYYUIapYNrozYMoyDRflx9mgT3Awyw==
+
 fs-minipass@^2.0.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/fs-minipass/-/fs-minipass-2.1.0.tgz#7f5036fdbf12c63c169190cbe4199c852271f9fb"
