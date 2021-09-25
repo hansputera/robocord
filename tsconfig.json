@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "esModuleInterop": true,
+        "module": "CommonJS",
+        "target": "ES2016",
+        "skipLibCheck": true,
+        "lib": ["ES2015"],
+        "allowSyntheticDefaultImports": true,
+        "outDir": "./dist",
+        "moduleResolution": "Node",
+        "declaration": true,
+    },
+    "include": ["src/**/*"],
+    "exclude": ["node_modules", "dist", "src/bot.ts"]
+}
