@@ -1,5 +1,6 @@
-import type { APIGuild } from 'discord-api-types';
+import type { APIGuild, APIUser } from 'discord-api-types';
 import { GuildClass } from '../../base/guild';
+import { UserClass } from '../../base/user';
 import type { Client } from '../../client';
 import { CacheService } from '../../services/cache';
 import { BaseEvent } from '../baseEvent';
@@ -24,13 +25,13 @@ export const guildCaches: CacheService<string, GuildClassRest> =
     clock: Date,
   });
 export class GuildEvent extends BaseEvent {
-  public eventRequired = ['GUILD_CREATE', 'GUILD_UPDATE', 'GUILD_DELETE'];
-  public eventAction = {
-    [this.eventRequired[0]]: this.onCreate.name,
-    [this.eventRequired[1]]: this.onUpdate.name,
-    [this.eventRequired[2]]: this.onLeave.name,
-  };
-
+  public eventRequired = [
+    ['GUILD_CREATE', this.onCreate.name],
+    ['GUILD_UPDATE', this.onUpdate.name],
+    ['GUILD_DELETE', this.onLeave.name],
+    ['GUILD_BAN_ADD', this.onBanAdd.name],
+    ['GUILD_BAN_REMOVE', this.onBanRemove.name],
+  ];
   onCreate(isStarted = false) {
     const guild = new GuildClassRest(
       this.client,
@@ -55,6 +56,20 @@ export class GuildEvent extends BaseEvent {
     const oldGuild = guildCaches.get(guild.id);
 
     this.client.emit('updateGuild', oldGuild, guild);
+  }
+
+  onBanAdd() {
+    const bannedUser = new UserClass(this.raw.d.user as APIUser);
+    const guild = guildCaches.get(this.raw.d.guild_id as string);
+
+    this.client.emit('banAdd', guild, bannedUser);
+  }
+
+  onBanRemove() {
+    const bannedUser = new UserClass(this.raw.d.user as APIUser);
+    const guild = guildCaches.get(this.raw.d.guild_id as string);
+
+    this.client.emit('banDelete', guild, bannedUser);
   }
 }
 

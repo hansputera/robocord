@@ -1,17 +1,12 @@
 import type { Raw } from '.';
+import type { UserClass } from '../base/user';
 import type { Client } from '../client';
 import type { GuildClassRest } from '../client/events/guild';
 import type { MessageClassRest } from '../client/events/message';
 import type { Context } from '../transformers/context';
 
 export interface BaseEventImplement {
-  eventRequired: string[];
-  eventAction: Record<string, string>;
-  onEdit?(): Promise<void> | void;
-  onUpdate?(): Promise<void> | void;
-  onLeave?(): Promise<void> | void;
-  onCreate?(): Promise<void> | void;
-  onDelete?(): Promise<void> | void;
+  eventRequired: string[][];
 }
 
 export interface ClientEvents {
@@ -35,4 +30,6 @@ export interface ClientEvents {
   newGuild: (guild: GuildClassRest) => void;
   leaveGuild: (guild: GuildClassRest) => void;
   updateGuild: (oldGuild: GuildClassRest, newGuild: GuildClassRest) => void;
+  banAdd: (guild: GuildClassRest, user: UserClass) => void;
+  banDelete: (guild: GuildClassRest, user: UserClass) => void;
 }

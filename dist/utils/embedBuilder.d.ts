@@ -1,0 +1,31 @@
+import type { KEYWORD, RGB, HSL, XYZ } from 'color-convert/conversions';
+import type { APIEmbed, APIEmbedAuthor, APIEmbedField, APIEmbedFooter, APIEmbedImage, APIEmbedThumbnail } from 'discord-api-types';
+import type { EmbedFieldData } from '../typings';
+export declare class EmbedBuilder {
+    protected title?: string;
+    protected description?: string;
+    protected url?: string;
+    protected timestamp: number;
+    protected color?: number;
+    protected thumbnail?: APIEmbedThumbnail;
+    protected footer?: APIEmbedFooter;
+    protected author?: APIEmbedAuthor;
+    protected image?: APIEmbedImage;
+    protected fields?: APIEmbedField[];
+    static randomHexColor(): string;
+    static convertRgb(dataColor: RGB): number;
+    static resolveColor(color: KEYWORD | HSL | XYZ): number;
+    setColor(color: string | HSL | XYZ): this;
+    setTimestamp(timestamp?: number): this;
+    setTitle(title: string): this;
+    setDescription(description: string): this;
+    setThumbnail(url: string): this;
+    setFooter(text: string, icon?: string): this;
+    setURL(url: string): this;
+    setAuthor(key: string, icon?: string, url?: string): this;
+    setImage(imageUrl: string, width?: number, height?: number): this;
+    addField(name: string, value: string, inline?: boolean): void;
+    addFields(...fields: EmbedFieldData[]): this;
+    build(): APIEmbed;
+    private fillField;
+}

@@ -37,10 +37,12 @@ export class LoaderEvent {
     this._events.toArray().forEach((event) => {
       if (Array.isArray(t)) {
         t.forEach((evt) => {
-          if (event.eventRequired.includes(evt)) temp_event.push(event);
+          const eventName = event.eventRequired.find((x) => x[0] === evt);
+          if (eventName) temp_event.push(event);
         });
       } else {
-        if (event.eventRequired.includes(t)) temp_event.push(event);
+        const eventName = event.eventRequired.find((x) => x[0] === t);
+        if (eventName) temp_event.push(event);
       }
     });
 

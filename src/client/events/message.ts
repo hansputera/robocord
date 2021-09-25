@@ -10,12 +10,11 @@ const messageCaches: CacheService<string, Context> = new CacheService({
   clock: Date,
 });
 export class MessageEvent extends BaseEvent {
-  public eventRequired = ['MESSAGE_CREATE', 'MESSAGE_UPDATE', 'MESSAGE_DELETE'];
-  public eventAction = {
-    [this.eventRequired.at(0)]: this.onCreate.name,
-    [this.eventRequired.at(1)]: this.onEdit.name,
-    [this.eventRequired.at(2)]: this.onDelete.name,
-  };
+  public eventRequired = [
+    ['MESSAGE_CREATE', this.onCreate.name],
+    ['MESSAGE_UPDATE', this.onEdit.name],
+    ['MESSAGE_DELETE', this.onDelete.name],
+  ];
   public messages = messageCaches;
   constructor() {
     super();

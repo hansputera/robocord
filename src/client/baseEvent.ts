@@ -3,8 +3,7 @@ import type { BaseEventImplement, Raw } from '../typings';
 
 export abstract class BaseEvent implements BaseEventImplement {
   public name: string = '';
-  public eventRequired = [];
-  public eventAction = {};
+  public eventRequired: string[][] = [];
 
   protected client: Client;
   protected raw: Raw;

@@ -206,7 +206,9 @@ export class RZRWebSocket {
             event.setClient(this.client);
             event.setRaw(parses);
 
-            const action = event.eventAction[parses.t];
+            const action = event.eventRequired.find(
+              (e) => e[0] === parses.t
+            )[0];
             this.loader.runEvent(event, action, [diffSeconds < 2]);
           });
         }
